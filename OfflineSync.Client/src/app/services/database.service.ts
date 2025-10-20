@@ -45,11 +45,25 @@ export interface MasterDataDocument {
   version: number;
 }
 
+export interface ArticleDocument {
+  id: string;
+  title: string;
+  content: string;
+  author: string;
+  imageData: string;
+  imageContentType: string;
+  publishedAt: string;
+  updatedAt: string;
+  isDeleted: boolean;
+  version: number;
+}
+
 // Define database collections
 export type DatabaseCollections = {
   datarecords: RxCollection<DataRecordDocument>;
   fileattachments: RxCollection<FileAttachmentDocument>;
   masterdata: RxCollection<MasterDataDocument>;
+  articles: RxCollection<ArticleDocument>;
 };
 
 export type AppDatabase = RxDatabase<DatabaseCollections>;
@@ -211,6 +225,53 @@ export class DatabaseService {
           },
           required: ['id', 'key', 'updatedAt', 'version'],
           indexes: ['category', 'updatedAt', 'version']
+        }
+      },
+      articles: {
+        schema: {
+          version: 0,
+          primaryKey: 'id',
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              maxLength: 100
+            },
+            title: {
+              type: 'string'
+            },
+            content: {
+              type: 'string'
+            },
+            author: {
+              type: 'string'
+            },
+            imageData: {
+              type: 'string'
+            },
+            imageContentType: {
+              type: 'string'
+            },
+            publishedAt: {
+              type: 'string',
+              maxLength: 50
+            },
+            updatedAt: {
+              type: 'string',
+              maxLength: 50
+            },
+            isDeleted: {
+              type: 'boolean'
+            },
+            version: {
+              type: 'number',
+              multipleOf: 1,
+              minimum: 0,
+              maximum: 17609481713130
+            }
+          },
+          required: ['id', 'title', 'updatedAt', 'version'],
+          indexes: ['publishedAt', 'updatedAt', 'version']
         }
       }
     });

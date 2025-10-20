@@ -9,10 +9,26 @@
         <span class="sync-time">Last sync: {{ lastSyncTime | date:'short' }}</span>
       }
       @if (isInitialized) {
-        <button class="btn-sync" (click)="manualSync()">Sync Now</button>
+        <button class="btn-sync" (click)="manualSync()" [disabled]="isSyncing">
+          {{ isSyncing ? 'Syncing...' : 'Sync Now' }}
+        </button>
       }
     </div>
   </header>
+
+  @if (isSyncing && isInitialized) {
+    <div class="sync-progress-bar">
+      <div class="sync-progress-container">
+        <div class="sync-progress-fill" [style.width.%]="syncProgress"></div>
+      </div>
+      <div class="sync-progress-text">
+        <span>{{ syncMessage }}</span>
+        @if (syncTotalItems > 0) {
+          <span class="sync-progress-count">({{ syncItemsSynced }}/{{ syncTotalItems }})</span>
+        }
+      </div>
+    </div>
+  }
 
   @if (!isInitialized) {
     <div class="init-section">
@@ -66,6 +82,34 @@
           ></textarea>
         </div>
         <button class="btn-primary" (click)="createNewRecord()">Create Record</button>
+      </section>
+
+      <section class="articles-section">
+        <h2>Articles ({{ articles.length }})</h2>
+        @if (articles.length === 0) {
+          <p class="no-records">No articles available. They will be synced from the server.</p>
+        }
+        @if (articles.length > 0) {
+          <div class="articles-grid">
+            @for (article of articles; track article.id) {
+              <div class="article-card">
+                @if (article.imageData) {
+                  <img 
+                    [src]="'data:' + article.imageContentType + ';base64,' + article.imageData" 
+                    [alt]="article.title"
+                    class="article-image"
+                  />
+                }
+                <div class="article-content">
+                  <h3>{{ article.title }}</h3>
+                  <p class="article-author">By {{ article.author }}</p>
+                  <p class="article-text">{{ article.content }}</p>
+                  <p class="article-date">Published: {{ article.publishedAt | date:'medium' }}</p>
+                </div>
+              </div>
+            }
+          </div>
+        }
       </section>
 
       <section class="masterdata-section">

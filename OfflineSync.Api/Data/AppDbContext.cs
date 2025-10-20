@@ -14,6 +14,7 @@ public class AppDbContext : DbContext
     public DbSet<FileAttachment> FileAttachments { get; set; }
     public DbSet<SyncMetadata> SyncMetadata { get; set; }
     public DbSet<MasterData> MasterData { get; set; }
+    public DbSet<Article> Articles { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -79,6 +80,17 @@ public class AppDbContext : DbContext
             entity.HasIndex(e => new { e.Category, e.Key });
             entity.Property(e => e.Key).IsRequired().HasMaxLength(200);
             entity.Property(e => e.Category).IsRequired().HasMaxLength(100);
+        });
+
+        // Configure Article
+        modelBuilder.Entity<Article>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.UpdatedAt);
+            entity.HasIndex(e => e.Version);
+            entity.HasIndex(e => e.PublishedAt);
+            entity.Property(e => e.Title).IsRequired().HasMaxLength(500);
+            entity.Property(e => e.Author).IsRequired().HasMaxLength(200);
         });
     }
 }
