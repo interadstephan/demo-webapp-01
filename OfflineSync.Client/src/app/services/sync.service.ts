@@ -86,8 +86,7 @@ export class SyncService {
         success: response.success,
         currentVersion: response.currentVersion,
         updatedRecordsCount: response.updatedRecords?.length || 0,
-        updatedFilesCount: response.updatedFiles?.length || 0,
-        updatedRecords: response.updatedRecords
+        updatedFilesCount: response.updatedFiles?.length || 0
       });
 
       if (response.success) {
