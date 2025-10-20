@@ -45,37 +45,58 @@ export class App implements OnInit {
     // Try to get stored agent ID
     const storedAgentId = localStorage.getItem('agentId');
     if (storedAgentId) {
-      this.agentId = storedAgentId;
+      // Normalize to lowercase to ensure consistency
+      this.agentId = storedAgentId.toLowerCase().trim();
       await this.initializeApp();
     }
   }
 
   async initializeApp() {
+    //const dbs = await window.indexedDB.databases()
+    //for (var i = 0; i < dbs.length; i++) {
+    //  let name = dbs[i].name;
+    //  window.indexedDB.deleteDatabase(name!);
+    //  console.log(name);
+    //}
     if (!this.agentId) {
       alert('Please enter an Agent ID');
       return;
     }
 
     try {
+      // Normalize agent ID to lowercase to match server format
+      this.agentId = this.agentId.toLowerCase().trim();
+      
+      console.log('[APP] Initializing with agentId:', this.agentId);
+      
       // Store agent ID
       localStorage.setItem('agentId', this.agentId);
 
       // Initialize database
+      console.log('[APP] Initializing database...');
       await this.dbService.initDatabase(this.agentId);
+      console.log('[APP] Database initialized');
 
       // Set up sync service
+      console.log('[APP] Setting up sync service...');
       this.syncService.setAgentId(this.agentId);
 
       // Start auto-sync every 30 seconds
+      console.log('[APP] Starting auto-sync...');
       await this.syncService.startAutoSync(30000);
+      console.log('[APP] Auto-sync started');
 
       // Subscribe to records
+      console.log('[APP] Setting up records subscription...');
       this.dataService.getRecords$(this.agentId).subscribe(records => {
+        console.log('[APP] Records subscription emitted:', records.length, 'records');
         this.records = records;
       });
+      console.log('[APP] Records subscription set up');
 
       this.isInitialized = true;
       this.lastSyncTime = new Date();
+      console.log('[APP] Initialization complete');
     } catch (error) {
       console.error('Initialization error:', error);
       alert('Failed to initialize app. Please check console for details.');

@@ -52,19 +52,19 @@ public class SyncController : ControllerBase
                         Description = pushedRecord.Description,
                         Data = pushedRecord.Data,
                         CreatedAt = DateTime.UtcNow,
-                        UpdatedAt = pushedRecord.UpdatedAt,
+                        UpdatedAt = pushedRecord.UpdatedAt.UtcDateTime,
                         IsDeleted = pushedRecord.IsDeleted,
                         Version = pushedRecord.Version > 0 ? pushedRecord.Version : DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
                     };
                     _context.DataRecords.Add(newRecord);
                 }
-                else if (existingRecord.UpdatedAt < pushedRecord.UpdatedAt)
+                else if (existingRecord.UpdatedAt < pushedRecord.UpdatedAt.UtcDateTime)
                 {
                     // Update existing record if client version is newer
                     existingRecord.Title = pushedRecord.Title;
                     existingRecord.Description = pushedRecord.Description;
                     existingRecord.Data = pushedRecord.Data;
-                    existingRecord.UpdatedAt = pushedRecord.UpdatedAt;
+                    existingRecord.UpdatedAt = pushedRecord.UpdatedAt.UtcDateTime;
                     existingRecord.IsDeleted = pushedRecord.IsDeleted;
                     existingRecord.Version = pushedRecord.Version > 0 ? pushedRecord.Version : DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                 }
@@ -88,19 +88,19 @@ public class SyncController : ControllerBase
                         FileSize = pushedFile.FileSize,
                         BlobPath = pushedFile.BlobPath,
                         CreatedAt = DateTime.UtcNow,
-                        UpdatedAt = pushedFile.UpdatedAt,
+                        UpdatedAt = pushedFile.UpdatedAt.UtcDateTime,
                         IsDeleted = pushedFile.IsDeleted,
                         Version = pushedFile.Version > 0 ? pushedFile.Version : DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
                     };
                     _context.FileAttachments.Add(newFile);
                 }
-                else if (existingFile.UpdatedAt < pushedFile.UpdatedAt)
+                else if (existingFile.UpdatedAt < pushedFile.UpdatedAt.UtcDateTime)
                 {
                     existingFile.FileName = pushedFile.FileName;
                     existingFile.ContentType = pushedFile.ContentType;
                     existingFile.FileSize = pushedFile.FileSize;
                     existingFile.BlobPath = pushedFile.BlobPath;
-                    existingFile.UpdatedAt = pushedFile.UpdatedAt;
+                    existingFile.UpdatedAt = pushedFile.UpdatedAt.UtcDateTime;
                     existingFile.IsDeleted = pushedFile.IsDeleted;
                     existingFile.Version = pushedFile.Version > 0 ? pushedFile.Version : DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                 }
@@ -118,7 +118,7 @@ public class SyncController : ControllerBase
                     Title = r.Title,
                     Description = r.Description,
                     Data = r.Data,
-                    UpdatedAt = r.UpdatedAt,
+                    UpdatedAt = new DateTimeOffset(DateTime.SpecifyKind(r.UpdatedAt, DateTimeKind.Utc)),
                     IsDeleted = r.IsDeleted,
                     Version = r.Version
                 })
@@ -135,7 +135,7 @@ public class SyncController : ControllerBase
                     ContentType = f.ContentType,
                     FileSize = f.FileSize,
                     BlobPath = f.BlobPath,
-                    UpdatedAt = f.UpdatedAt,
+                    UpdatedAt = new DateTimeOffset(DateTime.SpecifyKind(f.UpdatedAt, DateTimeKind.Utc)),
                     IsDeleted = f.IsDeleted,
                     Version = f.Version
                 })

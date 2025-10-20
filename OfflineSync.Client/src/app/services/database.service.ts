@@ -3,9 +3,11 @@ import { createRxDatabase, addRxPlugin, RxDatabase, RxCollection } from 'rxdb';
 import { getRxStorageDexie } from 'rxdb/plugins/storage-dexie';
 import { RxDBDevModePlugin } from 'rxdb/plugins/dev-mode';
 import { wrappedValidateAjvStorage } from 'rxdb/plugins/validate-ajv';
+import { RxDBMigrationSchemaPlugin } from 'rxdb/plugins/migration-schema';
 
 // Add RxDB plugins
 addRxPlugin(RxDBDevModePlugin);
+addRxPlugin(RxDBMigrationSchemaPlugin);
 
 // Define schema types
 export interface DataRecordDocument {
@@ -64,7 +66,7 @@ export class DatabaseService {
     await this.db.addCollections({
       datarecords: {
         schema: {
-          version: 0,
+          version: 2,
           primaryKey: 'id',
           type: 'object',
           properties: {
@@ -87,8 +89,7 @@ export class DatabaseService {
             },
             updatedAt: {
               type: 'string',
-              format: 'date-time',
-              maxLength: 30
+              maxLength: 50
             },
             isDeleted: {
               type: 'boolean'
@@ -102,11 +103,15 @@ export class DatabaseService {
           },
           required: ['id', 'agentId', 'title', 'updatedAt', 'version'],
           indexes: ['agentId', 'updatedAt', 'version']
+        },
+        migrationStrategies: {
+          1: (oldDoc: any) => oldDoc,
+          2: (oldDoc: any) => oldDoc
         }
       },
       fileattachments: {
         schema: {
-          version: 0,
+          version: 2,
           primaryKey: 'id',
           type: 'object',
           properties: {
@@ -136,8 +141,7 @@ export class DatabaseService {
             },
             updatedAt: {
               type: 'string',
-              format: 'date-time',
-              maxLength: 30
+              maxLength: 50
             },
             isDeleted: {
               type: 'boolean'
@@ -151,6 +155,10 @@ export class DatabaseService {
           },
           required: ['id', 'agentId', 'fileName', 'updatedAt', 'version'],
           indexes: ['agentId', 'updatedAt', 'version']
+        },
+        migrationStrategies: {
+          1: (oldDoc: any) => oldDoc,
+          2: (oldDoc: any) => oldDoc
         }
       }
     });

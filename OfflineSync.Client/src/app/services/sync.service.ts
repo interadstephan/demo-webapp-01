@@ -69,10 +69,25 @@ export class SyncService {
         pushedFiles
       };
 
+      console.log('[SYNC] Sending sync request:', {
+        agentId: this.agentId,
+        deviceId: this.deviceId,
+        lastSyncVersion: this.lastSyncVersion,
+        pushedRecordsCount: pushedRecords.length,
+        pushedFilesCount: pushedFiles.length
+      });
+
       // Send sync request to server
       const response = await firstValueFrom(
         this.http.post<SyncResponse>(`${this.apiUrl}/sync`, syncRequest)
       );
+
+      console.log('[SYNC] Received sync response:', {
+        success: response.success,
+        currentVersion: response.currentVersion,
+        updatedRecordsCount: response.updatedRecords?.length || 0,
+        updatedFilesCount: response.updatedFiles?.length || 0
+      });
 
       if (response.success) {
         // Apply server changes to local database
@@ -126,35 +141,63 @@ export class SyncService {
   }
 
   private async applyServerChanges(db: AppDatabase, response: SyncResponse): Promise<void> {
+    console.log(`[SYNC] Applying ${response.updatedRecords?.length || 0} record(s) and ${response.updatedFiles?.length || 0} file(s) from server`);
+    
     // Apply record updates
-    for (const record of response.updatedRecords) {
-      await db.datarecords.upsert({
+    for (const record of response.updatedRecords || []) {
+      console.log('[SYNC] Upserting record:', {
         id: record.id,
         agentId: record.agentId,
         title: record.title,
+        version: record.version
+      });
+      const normalizedUpdatedAt = this.normalizeDateString(record.updatedAt);
+      
+      await db.datarecords.upsert({
+        id: record.id?.toLowerCase(),
+        agentId: record.agentId?.toLowerCase(),
+        title: record.title,
         description: record.description,
         data: record.data,
-        updatedAt: record.updatedAt,
+        updatedAt: normalizedUpdatedAt,
         isDeleted: record.isDeleted,
         version: record.version
       });
     }
 
     // Apply file updates
-    for (const file of response.updatedFiles) {
+    for (const file of response.updatedFiles || []) {
+      const normalizedUpdatedAt = this.normalizeDateString(file.updatedAt);
       await db.fileattachments.upsert({
-        id: file.id,
-        agentId: file.agentId,
-        dataRecordId: file.dataRecordId,
+        id: file.id?.toLowerCase(),
+        agentId: file.agentId?.toLowerCase(),
+        dataRecordId: file.dataRecordId?.toLowerCase(),
         fileName: file.fileName,
         contentType: file.contentType,
         fileSize: file.fileSize,
         blobPath: file.blobPath,
-        updatedAt: file.updatedAt,
+        updatedAt: normalizedUpdatedAt,
         isDeleted: file.isDeleted,
         version: file.version
       });
     }
+    
+    console.log('[SYNC] Finished applying server changes');
+  }
+
+  private normalizeDateString(value: any): string {
+    if (!value) {
+      return new Date().toISOString();
+    }
+    try {
+      const d = new Date(value);
+      if (!isNaN(d.getTime())) {
+        return d.toISOString();
+      }
+    } catch {
+      // ignore
+    }
+    return new Date().toISOString();
   }
 
   private generateDeviceId(): string {

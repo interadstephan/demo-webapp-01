@@ -20,8 +20,8 @@ export class DataService {
     }
 
     await db.datarecords.insert({
-      id: this.generateId(),
-      agentId,
+      id: this.generateId().toLowerCase(),
+      agentId: agentId.toLowerCase(),
       title,
       description,
       data,
@@ -42,7 +42,7 @@ export class DataService {
       throw new Error('Database not initialized');
     }
 
-    const doc = await db.datarecords.findOne(id).exec();
+    const doc = await db.datarecords.findOne(id.toLowerCase()).exec();
     if (doc) {
       await doc.patch({
         title,
@@ -60,7 +60,7 @@ export class DataService {
       throw new Error('Database not initialized');
     }
 
-    const doc = await db.datarecords.findOne(id).exec();
+    const doc = await db.datarecords.findOne(id.toLowerCase()).exec();
     if (doc) {
       await doc.patch({
         isDeleted: true,
@@ -76,10 +76,13 @@ export class DataService {
       throw new Error('Database not initialized');
     }
 
+    const normalizedAgentId = agentId.toLowerCase();
+    console.log('[DATA] Creating records query for agentId:', normalizedAgentId);
+
     return db.datarecords
       .find({
         selector: {
-          agentId,
+          agentId: normalizedAgentId,
           isDeleted: false
         },
         sort: [{ updatedAt: 'desc' }]
@@ -93,7 +96,7 @@ export class DataService {
       throw new Error('Database not initialized');
     }
 
-    const doc = await db.datarecords.findOne(id).exec();
+    const doc = await db.datarecords.findOne(id.toLowerCase()).exec();
     return doc ? doc.toJSON() : null;
   }
 
