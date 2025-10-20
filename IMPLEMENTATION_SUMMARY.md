@@ -106,7 +106,7 @@ Files:
 ### 4. Infrastructure & DevOps
 
 **Files Created:**
-- `docker-compose.yml` - SQL Server 2022 container (optional, for non-LocalDB setups)
+- `docker-compose.yml` - SQL Server 2022 container (for production or cross-platform development)
 - `OfflineSync.sln` - Visual Studio solution file with both .NET and Angular projects
 - `OfflineSync.Client/OfflineSync.Client.esproj` - Angular project integration for Visual Studio
 - `start-dev.sh` - Linux/Mac startup script
@@ -263,8 +263,8 @@ Example conflict:
 
 ### Included for Production
 ✅ Visual Studio solution with integrated Angular project
-✅ SQL Server LocalDB support (for development)
-✅ Docker Compose for SQL Server (optional, for production)
+✅ SQL Server LocalDB support (for Windows development environments)
+✅ Docker Compose for SQL Server (recommended for production and non-Windows environments)
 ✅ Entity Framework migrations
 ✅ Environment-based configuration
 ✅ PWA manifest and service worker

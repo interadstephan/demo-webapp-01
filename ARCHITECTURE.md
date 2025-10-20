@@ -282,8 +282,8 @@ HTTP Response
 | ASP.NET Core | 8.0 | Web API framework |
 | C# | 12.0 | Programming language |
 | Entity Framework Core | 8.0 | ORM |
-| SQL Server | 2022/LocalDB | Database |
-| Docker | Latest | Container platform (optional) |
+| SQL Server | 2022/LocalDB | Database (LocalDB for Windows dev, Docker for production/Linux/Mac) |
+| Docker | Latest | Container platform (production & non-Windows) |
 
 ## Security Architecture
 
