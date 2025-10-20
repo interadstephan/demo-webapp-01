@@ -106,6 +106,40 @@ public class SyncController : ControllerBase
                 }
             }
 
+            // Process pushed master data from client
+            foreach (var pushedData in request.PushedMasterData)
+            {
+                var existingData = await _context.MasterData
+                    .FirstOrDefaultAsync(m => m.Id == pushedData.Id);
+
+                if (existingData == null)
+                {
+                    var newData = new MasterData
+                    {
+                        Id = pushedData.Id,
+                        Key = pushedData.Key,
+                        Value = pushedData.Value,
+                        Category = pushedData.Category,
+                        Description = pushedData.Description,
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = pushedData.UpdatedAt.UtcDateTime,
+                        IsDeleted = pushedData.IsDeleted,
+                        Version = pushedData.Version > 0 ? pushedData.Version : DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+                    };
+                    _context.MasterData.Add(newData);
+                }
+                else if (existingData.UpdatedAt < pushedData.UpdatedAt.UtcDateTime)
+                {
+                    existingData.Key = pushedData.Key;
+                    existingData.Value = pushedData.Value;
+                    existingData.Category = pushedData.Category;
+                    existingData.Description = pushedData.Description;
+                    existingData.UpdatedAt = pushedData.UpdatedAt.UtcDateTime;
+                    existingData.IsDeleted = pushedData.IsDeleted;
+                    existingData.Version = pushedData.Version > 0 ? pushedData.Version : DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                }
+            }
+
             await _context.SaveChangesAsync();
 
             // Get updates for this agent since last sync
@@ -138,6 +172,22 @@ public class SyncController : ControllerBase
                     UpdatedAt = new DateTimeOffset(DateTime.SpecifyKind(f.UpdatedAt, DateTimeKind.Utc)),
                     IsDeleted = f.IsDeleted,
                     Version = f.Version
+                })
+                .ToListAsync();
+
+            // Get master data updates (global data for all agents)
+            var updatedMasterData = await _context.MasterData
+                .Where(m => m.Version > request.LastSyncVersion)
+                .Select(m => new MasterDataDto
+                {
+                    Id = m.Id,
+                    Key = m.Key,
+                    Value = m.Value,
+                    Category = m.Category,
+                    Description = m.Description,
+                    UpdatedAt = new DateTimeOffset(DateTime.SpecifyKind(m.UpdatedAt, DateTimeKind.Utc)),
+                    IsDeleted = m.IsDeleted,
+                    Version = m.Version
                 })
                 .ToListAsync();
 
@@ -174,6 +224,7 @@ public class SyncController : ControllerBase
                 CurrentVersion = currentVersion,
                 UpdatedRecords = updatedRecords,
                 UpdatedFiles = updatedFiles,
+                UpdatedMasterData = updatedMasterData,
                 Success = true,
                 Message = "Sync completed successfully"
             });

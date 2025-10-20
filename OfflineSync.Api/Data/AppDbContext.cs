@@ -13,6 +13,7 @@ public class AppDbContext : DbContext
     public DbSet<DataRecord> DataRecords { get; set; }
     public DbSet<FileAttachment> FileAttachments { get; set; }
     public DbSet<SyncMetadata> SyncMetadata { get; set; }
+    public DbSet<MasterData> MasterData { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -67,6 +68,17 @@ public class AppDbContext : DbContext
             entity.HasKey(e => e.Id);
             entity.HasIndex(e => new { e.AgentId, e.DeviceId }).IsUnique();
             entity.Property(e => e.DeviceId).IsRequired().HasMaxLength(200);
+        });
+
+        // Configure MasterData
+        modelBuilder.Entity<MasterData>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.UpdatedAt);
+            entity.HasIndex(e => e.Version);
+            entity.HasIndex(e => new { e.Category, e.Key });
+            entity.Property(e => e.Key).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.Category).IsRequired().HasMaxLength(100);
         });
     }
 }

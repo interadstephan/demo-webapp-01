@@ -7,6 +7,7 @@ public class SyncRequest
     public long LastSyncVersion { get; set; }
     public List<DataRecordDto> PushedRecords { get; set; } = new();
     public List<FileAttachmentDto> PushedFiles { get; set; } = new();
+    public List<MasterDataDto> PushedMasterData { get; set; } = new();
 }
 
 public class DataRecordDto
@@ -30,6 +31,18 @@ public class FileAttachmentDto
     public string ContentType { get; set; } = string.Empty;
     public long FileSize { get; set; }
     public string BlobPath { get; set; } = string.Empty;
+    public DateTimeOffset UpdatedAt { get; set; }
+    public bool IsDeleted { get; set; }
+    public long Version { get; set; }
+}
+
+public class MasterDataDto
+{
+    public Guid Id { get; set; }
+    public string Key { get; set; } = string.Empty;
+    public string Value { get; set; } = string.Empty;
+    public string Category { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
     public DateTimeOffset UpdatedAt { get; set; }
     public bool IsDeleted { get; set; }
     public long Version { get; set; }
