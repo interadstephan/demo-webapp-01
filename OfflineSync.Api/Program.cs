@@ -20,7 +20,7 @@ builder.Services.AddCors(options =>
 
 // Configure database connection
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
-    ?? "Server=localhost;Database=OfflineSyncDb;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true";
+    ?? "Server=(localdb)\\MSSQLLocalDB;Database=OfflineSyncDb;Trusted_Connection=true;TrustServerCertificate=true";
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString));

@@ -65,10 +65,35 @@ A multi-client offline-capable web application built with ASP.NET Core 8, RxDB, 
 
 - .NET 8 SDK
 - Node.js 18+ and npm
-- Docker and Docker Compose (for SQL Server)
+- SQL Server LocalDB (included with Visual Studio) or Docker and Docker Compose (for SQL Server)
+- Visual Studio 2022 (recommended for integrated development)
 - Modern browser (Chrome, Safari on iPad)
 
 ## Setup Instructions
+
+### Using Visual Studio (Recommended)
+
+1. **Open the Solution**
+   - Open `OfflineSync.sln` in Visual Studio 2022
+   - The solution includes both the .NET API project and the Angular client project
+
+2. **Set Multiple Startup Projects** (Optional)
+   - Right-click on the solution in Solution Explorer
+   - Select "Configure Startup Projects"
+   - Choose "Multiple startup projects"
+   - Set both `OfflineSync.Api` and `OfflineSync.Client` to "Start"
+
+3. **Build and Run**
+   - Press F5 or click "Start" to build and run the application
+   - The API will start at `https://localhost:5001` or `http://localhost:5000`
+   - The Angular app will start at `http://localhost:4200`
+   - LocalDB will automatically create the database on first run
+
+4. **Database Management**
+   - Use SQL Server Object Explorer in Visual Studio to view the database
+   - The database is created at `(localdb)\MSSQLLocalDB` with the name `OfflineSyncDb`
+
+### Using Command Line
 
 ### 1. Clone the Repository
 
@@ -79,13 +104,19 @@ cd demo-webapp-01
 
 ### 2. Start SQL Server
 
-Using Docker Compose:
+**Option A: Using SQL Server LocalDB (Recommended for Visual Studio):**
+
+LocalDB is automatically installed with Visual Studio and requires no additional setup. The application will automatically create the database on first run.
+
+**Option B: Using Docker Compose:**
 
 ```bash
 docker-compose up -d
 ```
 
 Wait for SQL Server to be ready (check with `docker-compose logs -f sqlserver`).
+
+Note: If using Docker, you'll need to update the connection string in `appsettings.json` to use the Docker SQL Server credentials.
 
 ### 3. Run the Backend API
 
@@ -203,12 +234,17 @@ The response will include an `id` (GUID) that you'll use to initialize the clien
 ```json
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Server=localhost;Database=OfflineSyncDb;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true"
+    "DefaultConnection": "Server=(localdb)\\MSSQLLocalDB;Database=OfflineSyncDb;Trusted_Connection=true;TrustServerCertificate=true"
   },
   "FileStorage": {
     "Path": "uploads"
   }
 }
+```
+
+**Note:** The default configuration uses SQL Server LocalDB. If you prefer to use Docker SQL Server, change the connection string to:
+```
+"DefaultConnection": "Server=localhost;Database=OfflineSyncDb;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true"
 ```
 
 ### Frontend (sync.service.ts)
