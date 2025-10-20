@@ -2,6 +2,8 @@
 
 A multi-client offline-capable web application built with ASP.NET Core 8, RxDB, and Angular. This application enables hundreds of agents to sync their subset of data (including files) with a central SQL Server database, supporting offline-first functionality across desktop Chrome and iPad devices.
 
+📚 **[Quick Start Guide](QUICKSTART.md)** | 🤝 **[Contributing Guide](CONTRIBUTING.md)** | 🔧 **[API Examples](api-examples.http)**
+
 ## Features
 
 - **Offline-First Architecture**: Full functionality even without internet connection
