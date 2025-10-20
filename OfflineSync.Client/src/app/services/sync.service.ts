@@ -152,6 +152,7 @@ export class SyncService {
         title: record.title,
         version: record.version
       });
+      const normalizedUpdatedAt = this.normalizeDateString(record.updatedAt);
       
       await db.datarecords.upsert({
         id: record.id,
@@ -159,7 +160,7 @@ export class SyncService {
         title: record.title,
         description: record.description,
         data: record.data,
-        updatedAt: record.updatedAt,
+        updatedAt: normalizedUpdatedAt,
         isDeleted: record.isDeleted,
         version: record.version
       });
@@ -167,6 +168,7 @@ export class SyncService {
 
     // Apply file updates
     for (const file of response.updatedFiles || []) {
+      const normalizedUpdatedAt = this.normalizeDateString(file.updatedAt);
       await db.fileattachments.upsert({
         id: file.id,
         agentId: file.agentId,
@@ -175,13 +177,28 @@ export class SyncService {
         contentType: file.contentType,
         fileSize: file.fileSize,
         blobPath: file.blobPath,
-        updatedAt: file.updatedAt,
+        updatedAt: normalizedUpdatedAt,
         isDeleted: file.isDeleted,
         version: file.version
       });
     }
     
     console.log('[SYNC] Finished applying server changes');
+  }
+
+  private normalizeDateString(value: any): string {
+    if (!value) {
+      return new Date().toISOString();
+    }
+    try {
+      const d = new Date(value);
+      if (!isNaN(d.getTime())) {
+        return d.toISOString();
+      }
+    } catch {
+      // ignore
+    }
+    return new Date().toISOString();
   }
 
   private generateDeviceId(): string {

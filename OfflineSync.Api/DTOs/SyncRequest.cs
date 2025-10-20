@@ -16,7 +16,7 @@ public class DataRecordDto
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string Data { get; set; } = string.Empty;
-    public DateTime UpdatedAt { get; set; }
+    public DateTimeOffset UpdatedAt { get; set; }
     public bool IsDeleted { get; set; }
     public long Version { get; set; }
 }
@@ -30,7 +30,7 @@ public class FileAttachmentDto
     public string ContentType { get; set; } = string.Empty;
     public long FileSize { get; set; }
     public string BlobPath { get; set; } = string.Empty;
-    public DateTime UpdatedAt { get; set; }
+    public DateTimeOffset UpdatedAt { get; set; }
     public bool IsDeleted { get; set; }
     public long Version { get; set; }
 }

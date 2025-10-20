@@ -51,6 +51,12 @@ export class App implements OnInit {
   }
 
   async initializeApp() {
+    //const dbs = await window.indexedDB.databases()
+    //for (var i = 0; i < dbs.length; i++) {
+    //  let name = dbs[i].name;
+    //  window.indexedDB.deleteDatabase(name!);
+    //  console.log(name);
+    //}
     if (!this.agentId) {
       alert('Please enter an Agent ID');
       return;
