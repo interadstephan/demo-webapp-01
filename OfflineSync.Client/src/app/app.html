@@ -1,0 +1,99 @@
+<div class="app-container">
+  <header class="app-header">
+    <h1>{{ title }}</h1>
+    <div class="status-bar">
+      <span class="status-badge" [class.online]="isOnline" [class.offline]="!isOnline">
+        {{ isOnline ? 'Online' : 'Offline' }}
+      </span>
+      @if (lastSyncTime) {
+        <span class="sync-time">Last sync: {{ lastSyncTime | date:'short' }}</span>
+      }
+      @if (isInitialized) {
+        <button class="btn-sync" (click)="manualSync()">Sync Now</button>
+      }
+    </div>
+  </header>
+
+  @if (!isInitialized) {
+    <div class="init-section">
+      <h2>Initialize Application</h2>
+      <div class="form-group">
+        <label for="agentId">Agent ID:</label>
+        <input 
+          type="text" 
+          id="agentId" 
+          [(ngModel)]="agentId" 
+          placeholder="Enter your agent ID"
+          class="form-control"
+        />
+      </div>
+      <button class="btn-primary" (click)="initializeApp()">Initialize</button>
+    </div>
+  }
+
+  @if (isInitialized) {
+    <div class="content">
+      <section class="create-section">
+        <h2>Create New Record</h2>
+        <div class="form-group">
+          <label for="title">Title:</label>
+          <input 
+            type="text" 
+            id="title" 
+            [(ngModel)]="newRecord.title" 
+            placeholder="Enter title"
+            class="form-control"
+          />
+        </div>
+        <div class="form-group">
+          <label for="description">Description:</label>
+          <textarea 
+            id="description" 
+            [(ngModel)]="newRecord.description" 
+            placeholder="Enter description"
+            class="form-control"
+            rows="3"
+          ></textarea>
+        </div>
+        <div class="form-group">
+          <label for="data">Data:</label>
+          <textarea 
+            id="data" 
+            [(ngModel)]="newRecord.data" 
+            placeholder="Enter data"
+            class="form-control"
+            rows="5"
+          ></textarea>
+        </div>
+        <button class="btn-primary" (click)="createNewRecord()">Create Record</button>
+      </section>
+
+      <section class="records-section">
+        <h2>Records ({{ records.length }})</h2>
+        @if (records.length === 0) {
+          <p class="no-records">No records found. Create your first record above!</p>
+        }
+        @for (record of records; track record.id) {
+          <div class="record-card">
+            <div class="record-header">
+              <h3>{{ record.title }}</h3>
+              <button class="btn-delete" (click)="deleteRecord(record.id)">Delete</button>
+            </div>
+            @if (record.description) {
+              <p class="record-description">{{ record.description }}</p>
+            }
+            @if (record.data) {
+              <div class="record-data">
+                <strong>Data:</strong>
+                <pre>{{ record.data }}</pre>
+              </div>
+            }
+            <div class="record-footer">
+              <small>Updated: {{ record.updatedAt | date:'short' }}</small>
+            </div>
+          </div>
+        }
+      </section>
+    </div>
+  }
+</div>

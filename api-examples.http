@@ -1,0 +1,62 @@
+### Create a new agent
+POST http://localhost:5000/api/agent
+Content-Type: application/json
+
+{
+  "name": "Agent Smith",
+  "email": "smith@example.com"
+}
+
+### Get all agents
+GET http://localhost:5000/api/agent
+
+### Get agent by ID (replace with actual ID)
+GET http://localhost:5000/api/agent/00000000-0000-0000-0000-000000000000
+
+### Update agent (replace with actual ID)
+PUT http://localhost:5000/api/agent/00000000-0000-0000-0000-000000000000
+Content-Type: application/json
+
+{
+  "name": "Agent Smith Updated"
+}
+
+### Delete agent (replace with actual ID)
+DELETE http://localhost:5000/api/agent/00000000-0000-0000-0000-000000000000
+
+### Perform sync (replace with actual agent ID and device ID)
+POST http://localhost:5000/api/sync/sync
+Content-Type: application/json
+
+{
+  "agentId": "00000000-0000-0000-0000-000000000000",
+  "deviceId": "device_001",
+  "lastSyncVersion": 0,
+  "pushedRecords": [
+    {
+      "id": "record_001",
+      "agentId": "00000000-0000-0000-0000-000000000000",
+      "title": "Test Record",
+      "description": "This is a test record",
+      "data": "{\"key\": \"value\"}",
+      "updatedAt": "2025-10-20T07:00:00Z",
+      "isDeleted": false,
+      "version": 1729407600000
+    }
+  ],
+  "pushedFiles": []
+}
+
+### Get sync status for agent (replace with actual agent ID)
+GET http://localhost:5000/api/sync/agent/00000000-0000-0000-0000-000000000000/status
+
+### Get agent files (replace with actual agent ID)
+GET http://localhost:5000/api/file/agent/00000000-0000-0000-0000-000000000000
+
+### Upload file (multipart form data - use proper HTTP client)
+# POST http://localhost:5000/api/file/upload
+# Content-Type: multipart/form-data
+# Include: file, agentId, dataRecordId (optional)
+
+### Download file (replace with actual file ID)
+GET http://localhost:5000/api/file/download/00000000-0000-0000-0000-000000000000
