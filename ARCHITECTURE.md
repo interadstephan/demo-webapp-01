@@ -89,7 +89,7 @@
 │                                                             │
 │  ┌──────────────────────────────────────────────────────┐  │
 │  │  Microsoft SQL Server 2022                           │  │
-│  │  (Running in Docker container)                       │  │
+│  │  (LocalDB or Docker container)                       │  │
 │  │                                                       │  │
 │  │  Tables:                                             │  │
 │  │  ┌────────────────────────────────────────────────┐  │  │
@@ -282,8 +282,8 @@ HTTP Response
 | ASP.NET Core | 8.0 | Web API framework |
 | C# | 12.0 | Programming language |
 | Entity Framework Core | 8.0 | ORM |
-| SQL Server | 2022 | Database |
-| Docker | Latest | Container platform |
+| SQL Server | 2022/LocalDB | Database (LocalDB for Windows dev, Docker for production/Linux/Mac) |
+| Docker | Latest | Container platform (production & non-Windows) |
 
 ## Security Architecture
 

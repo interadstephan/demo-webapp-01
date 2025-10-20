@@ -6,19 +6,38 @@ Get your Offline Sync Web App up and running in 5 minutes!
 
 Before starting, ensure you have:
 
-- ✅ [Docker Desktop](https://www.docker.com/products/docker-desktop) installed and running
-- ✅ [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) installed
+- ✅ **Visual Studio 2022** (recommended) with .NET and Web Development workloads, OR
+- ✅ [Docker Desktop](https://www.docker.com/products/docker-desktop) installed and running (if not using LocalDB)
+- ✅ [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) installed (if not using Visual Studio)
 - ✅ [Node.js 18+](https://nodejs.org/) and npm installed
 
 Quick check:
 ```bash
-docker --version
 dotnet --version
 node --version
 npm --version
 ```
 
-## Option 1: Automated Start (Recommended)
+## Option 1: Using Visual Studio (Recommended)
+
+1. **Open the Solution**
+   - Open `OfflineSync.sln` in Visual Studio 2022
+   - Wait for package restore to complete
+
+2. **Configure Startup Projects** (Optional for parallel start)
+   - Right-click on the solution in Solution Explorer
+   - Select "Set Startup Projects..."
+   - Choose "Multiple startup projects"
+   - Set both `OfflineSync.Api` and `OfflineSync.Client` to "Start"
+
+3. **Run the Application**
+   - Press F5 or click "Start Debugging"
+   - Both projects will start automatically
+   - The API will be available at `https://localhost:5001`
+   - The Angular app will be available at `http://localhost:4200`
+   - LocalDB database is created automatically on first run
+
+## Option 2: Automated Command Line Start
 
 ### On Linux/Mac:
 ```bash
@@ -35,9 +54,13 @@ This will:
 2. Start the ASP.NET Core API on port 5000
 3. Start the Angular app on port 4200
 
-## Option 2: Manual Start
+## Option 3: Manual Command Line Start
 
-### Step 1: Start SQL Server
+### Step 1: Start SQL Server (Optional with LocalDB)
+
+**If using Visual Studio with LocalDB:** Skip this step - LocalDB starts automatically.
+
+**If using Docker:**
 ```bash
 docker-compose up -d
 ```
@@ -123,7 +146,11 @@ Invoke-RestMethod -Uri http://localhost:5000/api/agent `
 
 ## Troubleshooting
 
-### SQL Server won't start
+### SQL Server won't start (Docker only)
+
+**Note:** If using LocalDB with Visual Studio, SQL Server starts automatically.
+
+For Docker:
 ```bash
 # Check logs
 docker-compose logs sqlserver
@@ -151,6 +178,13 @@ npm install
 ```
 
 ### Database connection issues
+
+**LocalDB (default):**
+- LocalDB is automatically installed with Visual Studio
+- Verify Visual Studio is installed with "Data storage and processing" workload
+- Check connection string in `OfflineSync.Api/appsettings.json` matches: `Server=(localdb)\\MSSQLLocalDB`
+
+**Docker SQL Server:**
 Check `OfflineSync.Api/appsettings.json` and ensure the SQL Server password matches the one in `docker-compose.yml` (default: `YourStrong@Passw0rd`)
 
 ## Next Steps
