@@ -18,8 +18,8 @@ echo Waiting for SQL Server to be ready...
 timeout /t 10 /nobreak >nul
 
 REM Start backend
-echo Starting ASP.NET Core API...
-start /B cmd /c "cd OfflineSync.Api && dotnet run"
+REM echo Starting ASP.NET Core API...
+REM start /B cmd /c "cd OfflineSync.Api && dotnet run"
 
 REM Wait for backend to start
 timeout /t 5 /nobreak >nul

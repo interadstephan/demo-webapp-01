@@ -87,13 +87,17 @@ export class DatabaseService {
             },
             updatedAt: {
               type: 'string',
-              format: 'date-time'
+              format: 'date-time',
+              maxLength: 30
             },
             isDeleted: {
               type: 'boolean'
             },
             version: {
-              type: 'number'
+              type: 'number',
+              multipleOf: 1,
+              minimum: 0,
+              maximum: 17609481713130
             }
           },
           required: ['id', 'agentId', 'title', 'updatedAt', 'version'],
@@ -132,13 +136,17 @@ export class DatabaseService {
             },
             updatedAt: {
               type: 'string',
-              format: 'date-time'
+              format: 'date-time',
+              maxLength: 30
             },
             isDeleted: {
               type: 'boolean'
             },
             version: {
-              type: 'number'
+              type: 'number',
+              multipleOf: 1,
+              minimum: 0,
+              maximum: 17609481713130
             }
           },
           required: ['id', 'agentId', 'fileName', 'updatedAt', 'version'],
