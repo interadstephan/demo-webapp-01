@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { DatabaseService, DataRecordDocument } from './services/database.service';
+import { DatabaseService, DataRecordDocument, MasterDataDocument } from './services/database.service';
 import { SyncService } from './services/sync.service';
 import { DataService } from './services/data.service';
 
@@ -16,6 +16,7 @@ export class App implements OnInit {
   agentId = '';
   isInitialized = false;
   records: DataRecordDocument[] = [];
+  masterData: MasterDataDocument[] = [];
   
   newRecord = {
     title: '',
@@ -94,6 +95,11 @@ export class App implements OnInit {
       });
       console.log('[APP] Records subscription set up');
 
+      // Subscribe to master data
+      console.log('[APP] Setting up master data subscription...');
+      this.subscribeMasterData();
+      console.log('[APP] Master data subscription set up');
+
       this.isInitialized = true;
       this.lastSyncTime = new Date();
       console.log('[APP] Initialization complete');
@@ -159,5 +165,23 @@ export class App implements OnInit {
       console.error('Sync error:', error);
       alert('Sync failed');
     }
+  }
+
+  subscribeMasterData() {
+    const db = this.dbService.getDatabase();
+    if (!db) return;
+
+    db.masterdata.find({
+      selector: {
+        isDeleted: { $eq: false }
+      }
+    }).$.subscribe(masterData => {
+      console.log('[APP] Master data subscription emitted:', masterData.length, 'items');
+      this.masterData = masterData.map(doc => doc.toJSON() as MasterDataDocument);
+    });
+  }
+
+  getMasterDataByCategory(category: string): MasterDataDocument[] {
+    return this.masterData.filter(item => item.category === category);
   }
 }

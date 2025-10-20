@@ -72,7 +72,8 @@
 }
 
 .create-section,
-.records-section {
+.records-section,
+.masterdata-section {
   background-color: #f9f9f9;
   padding: 20px;
   border-radius: 8px;
@@ -84,7 +85,8 @@
   }
 }
 
-.records-section {
+.records-section,
+.masterdata-section {
   grid-column: 1 / -1;
 }
 
@@ -218,4 +220,57 @@ textarea.form-control {
     color: #999;
     font-size: 12px;
   }
+}
+
+.masterdata-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.masterdata-card {
+  background-color: white;
+  padding: 15px;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid #2196f3;
+}
+
+.masterdata-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+
+  h4 {
+    margin: 0;
+    color: #333;
+    font-size: 16px;
+    font-weight: 600;
+  }
+}
+
+.category-badge {
+  padding: 4px 8px;
+  background-color: #e3f2fd;
+  color: #1976d2;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.masterdata-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #2196f3;
+  margin: 10px 0;
+}
+
+.masterdata-description {
+  font-size: 12px;
+  color: #666;
+  margin: 5px 0 0 0;
+  font-style: italic;
 }

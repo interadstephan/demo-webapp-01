@@ -68,6 +68,29 @@
         <button class="btn-primary" (click)="createNewRecord()">Create Record</button>
       </section>
 
+      <section class="masterdata-section">
+        <h2>Settings (Master Data) ({{ masterData.length }})</h2>
+        @if (masterData.length === 0) {
+          <p class="no-records">No settings available. They will be synced from the server.</p>
+        }
+        @if (masterData.length > 0) {
+          <div class="masterdata-grid">
+            @for (item of masterData; track item.id) {
+              <div class="masterdata-card">
+                <div class="masterdata-header">
+                  <h4>{{ item.key }}</h4>
+                  <span class="category-badge">{{ item.category }}</span>
+                </div>
+                <p class="masterdata-value">{{ item.value }}</p>
+                @if (item.description) {
+                  <p class="masterdata-description">{{ item.description }}</p>
+                }
+              </div>
+            }
+          </div>
+        }
+      </section>
+
       <section class="records-section">
         <h2>Records ({{ records.length }})</h2>
         @if (records.length === 0) {

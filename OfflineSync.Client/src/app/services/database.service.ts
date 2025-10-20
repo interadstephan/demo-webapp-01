@@ -34,10 +34,22 @@ export interface FileAttachmentDocument {
   version: number;
 }
 
+export interface MasterDataDocument {
+  id: string;
+  key: string;
+  value: string;
+  category: string;
+  description: string;
+  updatedAt: string;
+  isDeleted: boolean;
+  version: number;
+}
+
 // Define database collections
 export type DatabaseCollections = {
   datarecords: RxCollection<DataRecordDocument>;
   fileattachments: RxCollection<FileAttachmentDocument>;
+  masterdata: RxCollection<MasterDataDocument>;
 };
 
 export type AppDatabase = RxDatabase<DatabaseCollections>;
@@ -159,6 +171,46 @@ export class DatabaseService {
         migrationStrategies: {
           1: (oldDoc: any) => oldDoc,
           2: (oldDoc: any) => oldDoc
+        }
+      },
+      masterdata: {
+        schema: {
+          version: 0,
+          primaryKey: 'id',
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              maxLength: 100
+            },
+            key: {
+              type: 'string'
+            },
+            value: {
+              type: 'string'
+            },
+            category: {
+              type: 'string'
+            },
+            description: {
+              type: 'string'
+            },
+            updatedAt: {
+              type: 'string',
+              maxLength: 50
+            },
+            isDeleted: {
+              type: 'boolean'
+            },
+            version: {
+              type: 'number',
+              multipleOf: 1,
+              minimum: 0,
+              maximum: 17609481713130
+            }
+          },
+          required: ['id', 'key', 'updatedAt', 'version'],
+          indexes: ['category', 'updatedAt', 'version']
         }
       }
     });

@@ -10,12 +10,14 @@ export interface SyncRequest {
   lastSyncVersion: number;
   pushedRecords: any[];
   pushedFiles: any[];
+  pushedMasterData: any[];
 }
 
 export interface SyncResponse {
   currentVersion: number;
   updatedRecords: any[];
   updatedFiles: any[];
+  updatedMasterData: any[];
   success: boolean;
   message: string;
 }
@@ -60,13 +62,15 @@ export class SyncService {
       // Get local changes to push to server
       const pushedRecords = await this.getLocalChanges(db);
       const pushedFiles = await this.getLocalFileChanges(db);
+      const pushedMasterData = await this.getLocalMasterDataChanges(db);
 
       const syncRequest: SyncRequest = {
         agentId: this.agentId,
         deviceId: this.deviceId,
         lastSyncVersion: this.lastSyncVersion,
         pushedRecords,
-        pushedFiles
+        pushedFiles,
+        pushedMasterData
       };
 
       console.log('[SYNC] Sending sync request:', {
@@ -74,7 +78,8 @@ export class SyncService {
         deviceId: this.deviceId,
         lastSyncVersion: this.lastSyncVersion,
         pushedRecordsCount: pushedRecords.length,
-        pushedFilesCount: pushedFiles.length
+        pushedFilesCount: pushedFiles.length,
+        pushedMasterDataCount: pushedMasterData.length
       });
 
       // Send sync request to server
@@ -86,7 +91,8 @@ export class SyncService {
         success: response.success,
         currentVersion: response.currentVersion,
         updatedRecordsCount: response.updatedRecords?.length || 0,
-        updatedFilesCount: response.updatedFiles?.length || 0
+        updatedFilesCount: response.updatedFiles?.length || 0,
+        updatedMasterDataCount: response.updatedMasterData?.length || 0
       });
 
       if (response.success) {
@@ -140,8 +146,22 @@ export class SyncService {
     return files.map(doc => doc.toJSON());
   }
 
+  private async getLocalMasterDataChanges(db: AppDatabase): Promise<any[]> {
+    const masterData = await db.masterdata
+      .find({
+        selector: {
+          version: {
+            $gt: this.lastSyncVersion
+          }
+        }
+      })
+      .exec();
+
+    return masterData.map(doc => doc.toJSON());
+  }
+
   private async applyServerChanges(db: AppDatabase, response: SyncResponse): Promise<void> {
-    console.log(`[SYNC] Applying ${response.updatedRecords?.length || 0} record(s) and ${response.updatedFiles?.length || 0} file(s) from server`);
+    console.log(`[SYNC] Applying ${response.updatedRecords?.length || 0} record(s), ${response.updatedFiles?.length || 0} file(s), and ${response.updatedMasterData?.length || 0} master data item(s) from server`);
     
     // Apply record updates
     for (const record of response.updatedRecords || []) {
@@ -179,6 +199,27 @@ export class SyncService {
         updatedAt: normalizedUpdatedAt,
         isDeleted: file.isDeleted,
         version: file.version
+      });
+    }
+
+    // Apply master data updates
+    for (const masterData of response.updatedMasterData || []) {
+      console.log('[SYNC] Upserting master data:', {
+        id: masterData.id,
+        key: masterData.key,
+        category: masterData.category,
+        version: masterData.version
+      });
+      const normalizedUpdatedAt = this.normalizeDateString(masterData.updatedAt);
+      await db.masterdata.upsert({
+        id: masterData.id?.toLowerCase(),
+        key: masterData.key,
+        value: masterData.value,
+        category: masterData.category,
+        description: masterData.description,
+        updatedAt: normalizedUpdatedAt,
+        isDeleted: masterData.isDeleted,
+        version: masterData.version
       });
     }
     
