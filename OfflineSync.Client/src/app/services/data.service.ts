@@ -76,6 +76,8 @@ export class DataService {
       throw new Error('Database not initialized');
     }
 
+    console.log('[DATA] Creating records query for agentId:', agentId);
+
     return db.datarecords
       .find({
         selector: {

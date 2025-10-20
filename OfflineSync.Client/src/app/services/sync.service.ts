@@ -69,10 +69,26 @@ export class SyncService {
         pushedFiles
       };
 
+      console.log('[SYNC] Sending sync request:', {
+        agentId: this.agentId,
+        deviceId: this.deviceId,
+        lastSyncVersion: this.lastSyncVersion,
+        pushedRecordsCount: pushedRecords.length,
+        pushedFilesCount: pushedFiles.length
+      });
+
       // Send sync request to server
       const response = await firstValueFrom(
         this.http.post<SyncResponse>(`${this.apiUrl}/sync`, syncRequest)
       );
+
+      console.log('[SYNC] Received sync response:', {
+        success: response.success,
+        currentVersion: response.currentVersion,
+        updatedRecordsCount: response.updatedRecords?.length || 0,
+        updatedFilesCount: response.updatedFiles?.length || 0,
+        updatedRecords: response.updatedRecords
+      });
 
       if (response.success) {
         // Apply server changes to local database
@@ -126,8 +142,17 @@ export class SyncService {
   }
 
   private async applyServerChanges(db: AppDatabase, response: SyncResponse): Promise<void> {
+    console.log(`[SYNC] Applying ${response.updatedRecords?.length || 0} record(s) and ${response.updatedFiles?.length || 0} file(s) from server`);
+    
     // Apply record updates
-    for (const record of response.updatedRecords) {
+    for (const record of response.updatedRecords || []) {
+      console.log('[SYNC] Upserting record:', {
+        id: record.id,
+        agentId: record.agentId,
+        title: record.title,
+        version: record.version
+      });
+      
       await db.datarecords.upsert({
         id: record.id,
         agentId: record.agentId,
@@ -141,7 +166,7 @@ export class SyncService {
     }
 
     // Apply file updates
-    for (const file of response.updatedFiles) {
+    for (const file of response.updatedFiles || []) {
       await db.fileattachments.upsert({
         id: file.id,
         agentId: file.agentId,
@@ -155,6 +180,8 @@ export class SyncService {
         version: file.version
       });
     }
+    
+    console.log('[SYNC] Finished applying server changes');
   }
 
   private generateDeviceId(): string {
