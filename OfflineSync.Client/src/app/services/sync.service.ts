@@ -154,8 +154,8 @@ export class SyncService {
       });
       
       await db.datarecords.upsert({
-        id: record.id,
-        agentId: record.agentId,
+        id: record.id?.toLowerCase(),
+        agentId: record.agentId?.toLowerCase(),
         title: record.title,
         description: record.description,
         data: record.data,
@@ -168,9 +168,9 @@ export class SyncService {
     // Apply file updates
     for (const file of response.updatedFiles || []) {
       await db.fileattachments.upsert({
-        id: file.id,
-        agentId: file.agentId,
-        dataRecordId: file.dataRecordId,
+        id: file.id?.toLowerCase(),
+        agentId: file.agentId?.toLowerCase(),
+        dataRecordId: file.dataRecordId?.toLowerCase(),
         fileName: file.fileName,
         contentType: file.contentType,
         fileSize: file.fileSize,

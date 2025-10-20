@@ -45,7 +45,8 @@ export class App implements OnInit {
     // Try to get stored agent ID
     const storedAgentId = localStorage.getItem('agentId');
     if (storedAgentId) {
-      this.agentId = storedAgentId;
+      // Normalize to lowercase to ensure consistency
+      this.agentId = storedAgentId.toLowerCase().trim();
       await this.initializeApp();
     }
   }
