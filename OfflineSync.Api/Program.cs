@@ -46,8 +46,7 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var context = services.GetRequiredService<AppDbContext>();
-        context.Database.EnsureDeleted();
-        context.Database.EnsureCreated();
+        // Apply pending migrations
         context.Database.Migrate();
     }
     catch (Exception ex)
