@@ -189,7 +189,7 @@ export class DatabaseService {
       },
       masterdata: {
         schema: {
-          version: 0,
+          version: 1,
           primaryKey: 'id',
           type: 'object',
           properties: {
@@ -204,7 +204,8 @@ export class DatabaseService {
               type: 'string'
             },
             category: {
-              type: 'string'
+              type: 'string',
+              maxLength: 100
             },
             description: {
               type: 'string'
@@ -223,8 +224,16 @@ export class DatabaseService {
               maximum: 17609481713130
             }
           },
-          required: ['id', 'key', 'updatedAt', 'version'],
+          required: ['id', 'key', 'category', 'updatedAt', 'version'],
           indexes: ['category', 'updatedAt', 'version']
+        },
+        migrationStrategies: {
+          1: (oldDoc: any) => {
+            if (!oldDoc.category) {
+              oldDoc.category = '';
+            }
+            return oldDoc;
+          }
         }
       },
       articles: {
@@ -238,7 +247,8 @@ export class DatabaseService {
               maxLength: 100
             },
             title: {
-              type: 'string'
+              type: 'string',
+              maxLength: 250
             },
             content: {
               type: 'string'
@@ -270,7 +280,7 @@ export class DatabaseService {
               maximum: 17609481713130
             }
           },
-          required: ['id', 'title', 'updatedAt', 'version'],
+          required: ['id', 'title', 'updatedAt', 'version', 'publishedAt'],
           indexes: ['publishedAt', 'updatedAt', 'version']
         }
       }
