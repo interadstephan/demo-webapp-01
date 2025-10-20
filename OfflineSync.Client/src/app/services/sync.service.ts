@@ -86,8 +86,7 @@ export class SyncService {
         success: response.success,
         currentVersion: response.currentVersion,
         updatedRecordsCount: response.updatedRecords?.length || 0,
-        updatedFilesCount: response.updatedFiles?.length || 0,
-        updatedRecords: response.updatedRecords
+        updatedFilesCount: response.updatedFiles?.length || 0
       });
 
       if (response.success) {
@@ -155,8 +154,8 @@ export class SyncService {
       const normalizedUpdatedAt = this.normalizeDateString(record.updatedAt);
       
       await db.datarecords.upsert({
-        id: record.id,
-        agentId: record.agentId,
+        id: record.id?.toLowerCase(),
+        agentId: record.agentId?.toLowerCase(),
         title: record.title,
         description: record.description,
         data: record.data,
@@ -170,9 +169,9 @@ export class SyncService {
     for (const file of response.updatedFiles || []) {
       const normalizedUpdatedAt = this.normalizeDateString(file.updatedAt);
       await db.fileattachments.upsert({
-        id: file.id,
-        agentId: file.agentId,
-        dataRecordId: file.dataRecordId,
+        id: file.id?.toLowerCase(),
+        agentId: file.agentId?.toLowerCase(),
+        dataRecordId: file.dataRecordId?.toLowerCase(),
         fileName: file.fileName,
         contentType: file.contentType,
         fileSize: file.fileSize,
