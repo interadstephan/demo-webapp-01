@@ -23,7 +23,7 @@ A multi-client offline-capable web application built with ASP.NET Core 8, RxDB, 
 - **RESTful API**: For client-server communication
 
 ### Frontend
-- **Angular 19+**: Modern web framework
+- **Angular 20+**: Modern web framework
 - **RxDB**: Reactive offline-first database (IndexedDB)
 - **RxJS**: Reactive programming library
 - **TypeScript**: Type-safe JavaScript

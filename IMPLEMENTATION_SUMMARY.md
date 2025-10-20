@@ -57,10 +57,10 @@ Files:
   GET    /api/file/agent/{id} - List agent files
 ```
 
-### 2. Frontend Application (Angular 19)
+### 2. Frontend Application (Angular 20)
 
 **Files Created:**
-- `OfflineSync.Client/` - Complete Angular 19 application
+- `OfflineSync.Client/` - Complete Angular 20 application
 - Services: `DatabaseService`, `SyncService`, `DataService`
 - Components: Main app component with full UI
 - RxDB integration with IndexedDB storage
