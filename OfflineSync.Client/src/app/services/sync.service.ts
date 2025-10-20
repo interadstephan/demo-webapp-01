@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { DatabaseService, AppDatabase } from './database.service';
 import { firstValueFrom } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface SyncRequest {
   agentId: string;
@@ -23,7 +24,7 @@ export interface SyncResponse {
   providedIn: 'root'
 })
 export class SyncService {
-  private apiUrl = 'http://localhost:5000/api/sync';
+  private apiUrl = `${environment.apiUrl}/sync`;
   private agentId: string = '';
   private deviceId: string = '';
   private lastSyncVersion: number = 0;
@@ -160,20 +161,35 @@ export class SyncService {
     return `device_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
   }
 
+  private syncIntervalId?: number;
+  private onlineHandler?: () => void;
+
   async startAutoSync(intervalMs: number = 30000): Promise<void> {
     // Perform initial sync
     await this.performSync();
 
-    // Set up periodic sync
-    setInterval(async () => {
+    // Set up periodic sync (store interval ID for cleanup)
+    this.syncIntervalId = window.setInterval(async () => {
       if (navigator.onLine) {
         await this.performSync();
       }
     }, intervalMs);
 
-    // Sync when coming back online
-    window.addEventListener('online', () => {
+    // Sync when coming back online (store handler for cleanup)
+    this.onlineHandler = () => {
       this.performSync();
-    });
+    };
+    window.addEventListener('online', this.onlineHandler);
+  }
+
+  stopAutoSync(): void {
+    if (this.syncIntervalId !== undefined) {
+      clearInterval(this.syncIntervalId);
+      this.syncIntervalId = undefined;
+    }
+    if (this.onlineHandler) {
+      window.removeEventListener('online', this.onlineHandler);
+      this.onlineHandler = undefined;
+    }
   }
 }

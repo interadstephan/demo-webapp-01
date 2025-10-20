@@ -309,11 +309,48 @@ npm test
 
 ## Security Considerations
 
-- **Authentication**: Add JWT bearer authentication for production
-- **Authorization**: Implement agent-specific data access controls
-- **HTTPS**: Use HTTPS in production
-- **SQL Injection**: Entity Framework provides protection
-- **Input Validation**: Validate all inputs on server and client
+⚠️ **Important**: This application is configured for development. Before deploying to production, make the following security changes:
+
+### Critical Security Updates Required
+
+1. **CORS Configuration** (OfflineSync.Api/Program.cs)
+   - Replace `AllowAnyOrigin()` with specific allowed origins
+   ```csharp
+   builder.Services.AddCors(options =>
+   {
+       options.AddPolicy("AllowAngular",
+           builder => builder
+               .WithOrigins("https://your-production-domain.com")
+               .AllowAnyMethod()
+               .AllowAnyHeader());
+   });
+   ```
+
+2. **Database Password** (docker-compose.yml & appsettings.json)
+   - Use environment variables instead of hardcoded passwords
+   - Store passwords in Azure Key Vault, AWS Secrets Manager, or similar
+   ```json
+   "ConnectionStrings": {
+     "DefaultConnection": "Server=localhost;Database=OfflineSyncDb;User Id=sa;Password=${DB_PASSWORD};TrustServerCertificate=true"
+   }
+   ```
+
+3. **API URL Configuration** (OfflineSync.Client/src/environments/environment.prod.ts)
+   - Update the production API URL
+   ```typescript
+   export const environment = {
+     production: true,
+     apiUrl: 'https://api.your-domain.com/api'
+   };
+   ```
+
+4. **Authentication**: Add JWT bearer authentication for production
+5. **Authorization**: Implement agent-specific data access controls
+6. **HTTPS**: Use HTTPS in production (required for PWA features)
+7. **SQL Injection**: Entity Framework provides protection
+8. **Input Validation**: Validate all inputs on server and client
+9. **File Upload Limits**: Configure appropriate file size limits
+10. **Rate Limiting**: Implement rate limiting on API endpoints
 
 ## Future Enhancements
 

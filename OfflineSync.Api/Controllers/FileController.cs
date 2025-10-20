@@ -59,7 +59,7 @@ public class FileController : ControllerBase
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
                 IsDeleted = false,
-                Version = DateTime.UtcNow.Ticks
+                Version = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
             };
 
             _context.FileAttachments.Add(fileAttachment);

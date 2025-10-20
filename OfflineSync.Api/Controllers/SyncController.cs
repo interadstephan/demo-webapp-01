@@ -43,7 +43,7 @@ public class SyncController : ControllerBase
 
                 if (existingRecord == null)
                 {
-                    // New record
+                    // New record - use client version if provided, otherwise generate server version
                     var newRecord = new DataRecord
                     {
                         Id = pushedRecord.Id,
@@ -54,7 +54,7 @@ public class SyncController : ControllerBase
                         CreatedAt = DateTime.UtcNow,
                         UpdatedAt = pushedRecord.UpdatedAt,
                         IsDeleted = pushedRecord.IsDeleted,
-                        Version = DateTime.UtcNow.Ticks
+                        Version = pushedRecord.Version > 0 ? pushedRecord.Version : DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
                     };
                     _context.DataRecords.Add(newRecord);
                 }
@@ -66,7 +66,7 @@ public class SyncController : ControllerBase
                     existingRecord.Data = pushedRecord.Data;
                     existingRecord.UpdatedAt = pushedRecord.UpdatedAt;
                     existingRecord.IsDeleted = pushedRecord.IsDeleted;
-                    existingRecord.Version = DateTime.UtcNow.Ticks;
+                    existingRecord.Version = pushedRecord.Version > 0 ? pushedRecord.Version : DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                 }
             }
 
@@ -90,7 +90,7 @@ public class SyncController : ControllerBase
                         CreatedAt = DateTime.UtcNow,
                         UpdatedAt = pushedFile.UpdatedAt,
                         IsDeleted = pushedFile.IsDeleted,
-                        Version = DateTime.UtcNow.Ticks
+                        Version = pushedFile.Version > 0 ? pushedFile.Version : DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
                     };
                     _context.FileAttachments.Add(newFile);
                 }
@@ -102,7 +102,7 @@ public class SyncController : ControllerBase
                     existingFile.BlobPath = pushedFile.BlobPath;
                     existingFile.UpdatedAt = pushedFile.UpdatedAt;
                     existingFile.IsDeleted = pushedFile.IsDeleted;
-                    existingFile.Version = DateTime.UtcNow.Ticks;
+                    existingFile.Version = pushedFile.Version > 0 ? pushedFile.Version : DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                 }
             }
 
@@ -145,7 +145,7 @@ public class SyncController : ControllerBase
             var syncMetadata = await _context.SyncMetadata
                 .FirstOrDefaultAsync(s => s.AgentId == request.AgentId && s.DeviceId == request.DeviceId);
 
-            var currentVersion = DateTime.UtcNow.Ticks;
+            var currentVersion = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
             if (syncMetadata == null)
             {
