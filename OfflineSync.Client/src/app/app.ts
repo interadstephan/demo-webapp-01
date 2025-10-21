@@ -35,6 +35,11 @@ export class App implements OnInit {
   syncItemsSynced = 0;
   syncTotalItems = 0;
 
+  // Articles modal
+  showArticlesModal = false;
+  articleSearchQuery = '';
+  filteredArticles: ArticleDocument[] = [];
+
   constructor(
     private dbService: DatabaseService,
     private syncService: SyncService,
@@ -219,6 +224,30 @@ export class App implements OnInit {
     }).$.subscribe(articles => {
       console.log('[APP] Articles subscription emitted:', articles.length, 'items');
       this.articles = articles.map(doc => doc.toJSON() as ArticleDocument);
+      // Update filtered articles when articles change
+      this.filterArticles();
     });
+  }
+
+  openArticlesModal() {
+    this.showArticlesModal = true;
+    this.articleSearchQuery = '';
+    this.filterArticles();
+  }
+
+  closeArticlesModal() {
+    this.showArticlesModal = false;
+    this.articleSearchQuery = '';
+  }
+
+  filterArticles() {
+    if (!this.articleSearchQuery.trim()) {
+      this.filteredArticles = [...this.articles];
+    } else {
+      const query = this.articleSearchQuery.toLowerCase();
+      this.filteredArticles = this.articles.filter(article => 
+        article.title.toLowerCase().includes(query)
+      );
+    }
   }
 }

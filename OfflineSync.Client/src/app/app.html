@@ -90,27 +90,56 @@
           <p class="no-records">No articles available. They will be synced from the server.</p>
         }
         @if (articles.length > 0) {
-          <div class="articles-grid">
-            @for (article of articles; track article.id) {
-              <div class="article-card">
-                @if (article.imageData) {
-                  <img 
-                    [src]="'data:' + article.imageContentType + ';base64,' + article.imageData" 
-                    [alt]="article.title"
-                    class="article-image"
-                  />
-                }
-                <div class="article-content">
-                  <h3>{{ article.title }}</h3>
-                  <p class="article-author">By {{ article.author }}</p>
-                  <p class="article-text">{{ article.content }}</p>
-                  <p class="article-date">Published: {{ article.publishedAt | date:'medium' }}</p>
-                </div>
-              </div>
-            }
-          </div>
+          <button class="btn-primary btn-view-articles" (click)="openArticlesModal()">
+            View All Articles ({{ articles.length }})
+          </button>
         }
       </section>
+
+      <!-- Articles Modal -->
+      @if (showArticlesModal) {
+        <div class="modal-overlay" (click)="closeArticlesModal()">
+          <div class="modal-content" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+              <h2>All Articles ({{ filteredArticles.length }})</h2>
+              <button class="btn-close" (click)="closeArticlesModal()">×</button>
+            </div>
+            <div class="modal-search">
+              <input 
+                type="text" 
+                [(ngModel)]="articleSearchQuery" 
+                (ngModelChange)="filterArticles()"
+                placeholder="Search articles by title..."
+                class="search-input"
+              />
+            </div>
+            <div class="modal-body">
+              <div class="articles-grid">
+                @for (article of filteredArticles; track article.id) {
+                  <div class="article-card">
+                    @if (article.imageData) {
+                      <img 
+                        [src]="'data:' + article.imageContentType + ';base64,' + article.imageData" 
+                        [alt]="article.title"
+                        class="article-image"
+                      />
+                    }
+                    <div class="article-content">
+                      <h3>{{ article.title }}</h3>
+                      <p class="article-author">By {{ article.author }}</p>
+                      <p class="article-text">{{ article.content }}</p>
+                      <p class="article-date">Published: {{ article.publishedAt | date:'medium' }}</p>
+                    </div>
+                  </div>
+                }
+              </div>
+              @if (filteredArticles.length === 0) {
+                <p class="no-records">No articles found matching "{{ articleSearchQuery }}"</p>
+              }
+            </div>
+          </div>
+        </div>
+      }
 
       <section class="masterdata-section">
         <h2>Settings (Master Data) ({{ masterData.length }})</h2>
