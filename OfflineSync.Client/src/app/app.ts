@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { DatabaseService, DataRecordDocument } from './services/database.service';
+import { DatabaseService, DataRecordDocument, MasterDataDocument, ArticleDocument } from './services/database.service';
 import { SyncService } from './services/sync.service';
 import { DataService } from './services/data.service';
 
@@ -16,6 +16,8 @@ export class App implements OnInit {
   agentId = '';
   isInitialized = false;
   records: DataRecordDocument[] = [];
+  masterData: MasterDataDocument[] = [];
+  articles: ArticleDocument[] = [];
   
   newRecord = {
     title: '',
@@ -25,6 +27,18 @@ export class App implements OnInit {
   
   isOnline = navigator.onLine;
   lastSyncTime: Date | null = null;
+  
+  // Sync progress
+  isSyncing = false;
+  syncProgress = 0;
+  syncMessage = '';
+  syncItemsSynced = 0;
+  syncTotalItems = 0;
+
+  // Articles modal
+  showArticlesModal = false;
+  articleSearchQuery = '';
+  filteredArticles: ArticleDocument[] = [];
 
   constructor(
     private dbService: DatabaseService,
@@ -94,6 +108,25 @@ export class App implements OnInit {
       });
       console.log('[APP] Records subscription set up');
 
+      // Subscribe to master data
+      console.log('[APP] Setting up master data subscription...');
+      this.subscribeMasterData();
+      console.log('[APP] Master data subscription set up');
+
+      // Subscribe to articles
+      console.log('[APP] Setting up articles subscription...');
+      this.subscribeArticles();
+      console.log('[APP] Articles subscription set up');
+
+      // Subscribe to sync progress
+      this.syncService.syncProgress$.subscribe(progress => {
+        this.isSyncing = progress.issyncing;
+        this.syncProgress = progress.progress;
+        this.syncMessage = progress.message;
+        this.syncItemsSynced = progress.itemsSynced;
+        this.syncTotalItems = progress.totalItems;
+      });
+
       this.isInitialized = true;
       this.lastSyncTime = new Date();
       console.log('[APP] Initialization complete');
@@ -158,6 +191,63 @@ export class App implements OnInit {
     } catch (error) {
       console.error('Sync error:', error);
       alert('Sync failed');
+    }
+  }
+
+  subscribeMasterData() {
+    const db = this.dbService.getDatabase();
+    if (!db) return;
+
+    db.masterdata.find({
+      selector: {
+        isDeleted: { $eq: false }
+      }
+    }).$.subscribe(masterData => {
+      console.log('[APP] Master data subscription emitted:', masterData.length, 'items');
+      this.masterData = masterData.map(doc => doc.toJSON() as MasterDataDocument);
+    });
+  }
+
+  getMasterDataByCategory(category: string): MasterDataDocument[] {
+    return this.masterData.filter(item => item.category === category);
+  }
+
+  subscribeArticles() {
+    const db = this.dbService.getDatabase();
+    if (!db) return;
+
+    db.articles.find({
+      selector: {
+        isDeleted: { $eq: false }
+      },
+      sort: [{ publishedAt: 'desc' }]
+    }).$.subscribe(articles => {
+      console.log('[APP] Articles subscription emitted:', articles.length, 'items');
+      this.articles = articles.map(doc => doc.toJSON() as ArticleDocument);
+      // Update filtered articles when articles change
+      this.filterArticles();
+    });
+  }
+
+  openArticlesModal() {
+    this.showArticlesModal = true;
+    this.articleSearchQuery = '';
+    this.filterArticles();
+  }
+
+  closeArticlesModal() {
+    this.showArticlesModal = false;
+    this.articleSearchQuery = '';
+  }
+
+  filterArticles() {
+    if (!this.articleSearchQuery.trim()) {
+      this.filteredArticles = [...this.articles];
+    } else {
+      const query = this.articleSearchQuery.toLowerCase();
+      this.filteredArticles = this.articles.filter(article => 
+        article.title.toLowerCase().includes(query)
+      );
     }
   }
 }

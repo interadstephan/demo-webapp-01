@@ -34,10 +34,36 @@ export interface FileAttachmentDocument {
   version: number;
 }
 
+export interface MasterDataDocument {
+  id: string;
+  key: string;
+  value: string;
+  category: string;
+  description: string;
+  updatedAt: string;
+  isDeleted: boolean;
+  version: number;
+}
+
+export interface ArticleDocument {
+  id: string;
+  title: string;
+  content: string;
+  author: string;
+  imageData: string;
+  imageContentType: string;
+  publishedAt: string;
+  updatedAt: string;
+  isDeleted: boolean;
+  version: number;
+}
+
 // Define database collections
 export type DatabaseCollections = {
   datarecords: RxCollection<DataRecordDocument>;
   fileattachments: RxCollection<FileAttachmentDocument>;
+  masterdata: RxCollection<MasterDataDocument>;
+  articles: RxCollection<ArticleDocument>;
 };
 
 export type AppDatabase = RxDatabase<DatabaseCollections>;
@@ -159,6 +185,103 @@ export class DatabaseService {
         migrationStrategies: {
           1: (oldDoc: any) => oldDoc,
           2: (oldDoc: any) => oldDoc
+        }
+      },
+      masterdata: {
+        schema: {
+          version: 1,
+          primaryKey: 'id',
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              maxLength: 100
+            },
+            key: {
+              type: 'string'
+            },
+            value: {
+              type: 'string'
+            },
+            category: {
+              type: 'string',
+              maxLength: 100
+            },
+            description: {
+              type: 'string'
+            },
+            updatedAt: {
+              type: 'string',
+              maxLength: 50
+            },
+            isDeleted: {
+              type: 'boolean'
+            },
+            version: {
+              type: 'number',
+              multipleOf: 1,
+              minimum: 0,
+              maximum: 17609481713130
+            }
+          },
+          required: ['id', 'key', 'category', 'updatedAt', 'version'],
+          indexes: ['category', 'updatedAt', 'version']
+        },
+        migrationStrategies: {
+          1: (oldDoc: any) => {
+            if (!oldDoc.category) {
+              oldDoc.category = '';
+            }
+            return oldDoc;
+          }
+        }
+      },
+      articles: {
+        schema: {
+          version: 0,
+          primaryKey: 'id',
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              maxLength: 100
+            },
+            title: {
+              type: 'string',
+              maxLength: 250
+            },
+            content: {
+              type: 'string'
+            },
+            author: {
+              type: 'string'
+            },
+            imageData: {
+              type: 'string'
+            },
+            imageContentType: {
+              type: 'string'
+            },
+            publishedAt: {
+              type: 'string',
+              maxLength: 50
+            },
+            updatedAt: {
+              type: 'string',
+              maxLength: 50
+            },
+            isDeleted: {
+              type: 'boolean'
+            },
+            version: {
+              type: 'number',
+              multipleOf: 1,
+              minimum: 0,
+              maximum: 17609481713130
+            }
+          },
+          required: ['id', 'title', 'updatedAt', 'version', 'publishedAt'],
+          indexes: ['publishedAt', 'updatedAt', 'version']
         }
       }
     });

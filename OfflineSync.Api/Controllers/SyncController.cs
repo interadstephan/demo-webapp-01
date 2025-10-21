@@ -106,6 +106,78 @@ public class SyncController : ControllerBase
                 }
             }
 
+            // Process pushed master data from client
+            foreach (var pushedData in request.PushedMasterData)
+            {
+                var existingData = await _context.MasterData
+                    .FirstOrDefaultAsync(m => m.Id == pushedData.Id);
+
+                if (existingData == null)
+                {
+                    var newData = new MasterData
+                    {
+                        Id = pushedData.Id,
+                        Key = pushedData.Key,
+                        Value = pushedData.Value,
+                        Category = pushedData.Category,
+                        Description = pushedData.Description,
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = pushedData.UpdatedAt.UtcDateTime,
+                        IsDeleted = pushedData.IsDeleted,
+                        Version = pushedData.Version > 0 ? pushedData.Version : DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+                    };
+                    _context.MasterData.Add(newData);
+                }
+                else if (existingData.UpdatedAt < pushedData.UpdatedAt.UtcDateTime)
+                {
+                    existingData.Key = pushedData.Key;
+                    existingData.Value = pushedData.Value;
+                    existingData.Category = pushedData.Category;
+                    existingData.Description = pushedData.Description;
+                    existingData.UpdatedAt = pushedData.UpdatedAt.UtcDateTime;
+                    existingData.IsDeleted = pushedData.IsDeleted;
+                    existingData.Version = pushedData.Version > 0 ? pushedData.Version : DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                }
+            }
+
+            // Process pushed articles from client
+            foreach (var pushedArticle in request.PushedArticles)
+            {
+                var existingArticle = await _context.Articles
+                    .FirstOrDefaultAsync(a => a.Id == pushedArticle.Id);
+
+                if (existingArticle == null)
+                {
+                    var newArticle = new Article
+                    {
+                        Id = pushedArticle.Id,
+                        Title = pushedArticle.Title,
+                        Content = pushedArticle.Content,
+                        Author = pushedArticle.Author,
+                        ImageData = pushedArticle.ImageData,
+                        ImageContentType = pushedArticle.ImageContentType,
+                        PublishedAt = pushedArticle.PublishedAt.UtcDateTime,
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = pushedArticle.UpdatedAt.UtcDateTime,
+                        IsDeleted = pushedArticle.IsDeleted,
+                        Version = pushedArticle.Version > 0 ? pushedArticle.Version : DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+                    };
+                    _context.Articles.Add(newArticle);
+                }
+                else if (existingArticle.UpdatedAt < pushedArticle.UpdatedAt.UtcDateTime)
+                {
+                    existingArticle.Title = pushedArticle.Title;
+                    existingArticle.Content = pushedArticle.Content;
+                    existingArticle.Author = pushedArticle.Author;
+                    existingArticle.ImageData = pushedArticle.ImageData;
+                    existingArticle.ImageContentType = pushedArticle.ImageContentType;
+                    existingArticle.PublishedAt = pushedArticle.PublishedAt.UtcDateTime;
+                    existingArticle.UpdatedAt = pushedArticle.UpdatedAt.UtcDateTime;
+                    existingArticle.IsDeleted = pushedArticle.IsDeleted;
+                    existingArticle.Version = pushedArticle.Version > 0 ? pushedArticle.Version : DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                }
+            }
+
             await _context.SaveChangesAsync();
 
             // Get updates for this agent since last sync
@@ -138,6 +210,50 @@ public class SyncController : ControllerBase
                     UpdatedAt = new DateTimeOffset(DateTime.SpecifyKind(f.UpdatedAt, DateTimeKind.Utc)),
                     IsDeleted = f.IsDeleted,
                     Version = f.Version
+                })
+                .ToListAsync();
+
+            // Get master data updates (global data for all agents)
+            var updatedMasterData = await _context.MasterData
+                .Where(m => m.Version > request.LastSyncVersion)
+                .Select(m => new MasterDataDto
+                {
+                    Id = m.Id,
+                    Key = m.Key,
+                    Value = m.Value,
+                    Category = m.Category,
+                    Description = m.Description,
+                    UpdatedAt = new DateTimeOffset(DateTime.SpecifyKind(m.UpdatedAt, DateTimeKind.Utc)),
+                    IsDeleted = m.IsDeleted,
+                    Version = m.Version
+                })
+                .ToListAsync();
+
+            // Get articles updates (global data for all agents) with pagination
+            var articlesQuery = _context.Articles
+                .Where(a => a.Version > request.LastSyncVersion)
+                .OrderBy(a => a.UpdatedAt);
+
+            var totalArticles = await articlesQuery.CountAsync();
+            var pageSize = request.PageSize > 0 ? request.PageSize : 10;
+            var totalPages = (int)Math.Ceiling(totalArticles / (double)pageSize);
+            var currentPage = request.PageNumber > 0 ? request.PageNumber : 1;
+
+            var updatedArticles = await articlesQuery
+                .Skip((currentPage - 1) * pageSize)
+                .Take(pageSize)
+                .Select(a => new ArticleDto
+                {
+                    Id = a.Id,
+                    Title = a.Title,
+                    Content = a.Content,
+                    Author = a.Author,
+                    ImageData = a.ImageData,
+                    ImageContentType = a.ImageContentType,
+                    PublishedAt = new DateTimeOffset(DateTime.SpecifyKind(a.PublishedAt, DateTimeKind.Utc)),
+                    UpdatedAt = new DateTimeOffset(DateTime.SpecifyKind(a.UpdatedAt, DateTimeKind.Utc)),
+                    IsDeleted = a.IsDeleted,
+                    Version = a.Version
                 })
                 .ToListAsync();
 
@@ -174,6 +290,12 @@ public class SyncController : ControllerBase
                 CurrentVersion = currentVersion,
                 UpdatedRecords = updatedRecords,
                 UpdatedFiles = updatedFiles,
+                UpdatedMasterData = updatedMasterData,
+                UpdatedArticles = updatedArticles,
+                TotalArticles = totalArticles,
+                CurrentPage = currentPage,
+                TotalPages = totalPages,
+                HasMoreArticles = currentPage < totalPages,
                 Success = true,
                 Message = "Sync completed successfully"
             });
